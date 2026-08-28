@@ -1,28 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>PhosGuard</title>
-    <link rel="stylesheet" href="src/style.css">
-</head>
-<body>
-    <div id="app">
-        <header>
-            <h1>PhosGuard</h1>
-            <p>Phosphorus & Nutrition Tracker</p>
-        </header>
-        <main>
-            <section id="scan-section">
-                <h2>Scan Food Label</h2>
-                <button id="scan-btn">Scan Image</button>
-            </section>
-            <section id="log-section">
-                <h2>Daily Logs</h2>
-                <ul id="log-list"></ul>
-            </section>
-        </main>
-    </div>
-    <script type="module" src="src/main.js"></script>
-</body>
+    <link rel="stylesheet" href="/src/style.css">
+  </head>
+  <body>
+    <header class="app-header">
+      <h1>PhosGuard</h1>
+      <button id="btn-export" class="icon-button">Export CSV</button>
+    </header>
+
+    <main class="dashboard">
+      <!-- Daily Accumulation Gauges -->
+      <section class="daily-summary">
+        <h2>Today's Intake</h2>
+        <div class="metrics-grid">
+          <div class="metric-card" id="metric-phos">
+            <span class="label">Phosphorus</span>
+            <span class="value">0 / 1000 mg</span>
+            <progress value="0" max="1000" id="prog-phos"></progress>
+          </div>
+          <div class="metric-card" id="metric-k">
+            <span class="label">Potassium</span>
+            <span class="value">0 / 2500 mg</span>
+            <progress value="0" max="2500" id="prog-k"></progress>
+          </div>
+        </div>
+      </section>
+
+      <!-- Primary Action Buttons -->
+      <section class="actions">
+        <button id="btn-scan-ingredients" class="primary-btn warning-theme">
+          Scan Ingredients (Phos-Catcher)
+        </button>
+        <button id="btn-scan-barcode" class="primary-btn">
+          Scan Barcode
+        </button>
+      </section>
+
+      <!-- The Logbook -->
+      <section class="logbook">
+        <h3>Today's Log</h3>
+        <ul id="food-list" class="food-list">
+          <!-- JS will inject <li> items here -->
+        </ul>
+      </section>
+    </main>
+    <script type="module" src="/src/main.js"></script>
+  </body>
 </html>
