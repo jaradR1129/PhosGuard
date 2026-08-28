@@ -1,35 +1,67 @@
-import { initDB, saveLog, getLogs } from './db.js';
-import { performOCR } from './utils/ocr.js';
-import { analyzeNutrition } from './utils/api.js';
+import { db } from './db.js';
+import { scanIngredients } from './utils/ocr.js';
+import { fetchBarcodeData } from './utils/api.js';
 
-document.addEventListener('DOMContentLoaded', async () => {
-    await initDB();
-    displayLogs();
+// Elements
+const progPhos = document.getElementById('prog-phos');
+const progK = document.getElementById('prog-k');
+const foodList = document.getElementById('food-list');
+const btnScanIngredients = document.getElementById('btn-scan-ingredients');
+const btnScanBarcode = document.getElementById('btn-scan-barcode');
 
-    const scanBtn = document.getElementById('scan-btn');
-    if (scanBtn) {
-        scanBtn.addEventListener('click', async () => {
-            alert('Simulating label scan...');
-            const simulatedText = "Ingredients: Phosphorus 150mg, Sodium 200mg";
-            const nutritionData = await analyzeNutrition(simulatedText);
-            await saveLog({
-                date: new Date().toISOString(),
-                text: simulatedText,
-                analysis: nutritionData
-            });
-            displayLogs();
-        });
+// Render daily logs & calculate gauge totals
+async function renderDashboard() {
+  const today = new Date().toISOString().split('T')[0];
+  const logs = await db.logs.where('date').equals(today).toArray();
+
+  let totalPhos = 0;
+  let totalK = 0;
+
+  foodList.innerHTML = '';
+
+  logs.forEach(item => {
+    totalPhos += item.phos_mg || 0;
+    totalK += item.potassium_mg || 0;
+
+    const li = document.createElement('li');
+    li.style.background = '#fff';
+    li.style.padding = '12px';
+    li.style.borderRadius = '8px';
+    li.innerHTML = `<strong>${item.foodName}</strong>: ${item.phos_mg}mg Phos | ${item.potassium_mg}mg K`;
+    foodList.appendChild(li);
+  });
+
+  progPhos.value = totalPhos;
+  progK.value = totalK;
+  document.querySelector('#metric-phos .value').textContent = `${totalPhos} / 1000 mg`;
+  document.querySelector('#metric-k .value').textContent = `${totalK} / 2500 mg`;
+}
+
+// Hidden file input for camera / image OCR capture
+const fileInput = document.createElement('input');
+fileInput.type = 'file';
+fileInput.accept = 'image/*';
+fileInput.capture = 'environment';
+
+btnScanIngredients.addEventListener('click', () => fileInput.click());
+
+fileInput.addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  btnScanIngredients.textContent = 'Analyzing Label...';
+  const img = new Image();
+  img.src = URL.createObjectURL(file);
+  img.onload = async () => {
+    const result = await scanIngredients(img);
+    if (result.isDangerous) {
+      alert('⚠️ Warning: Inorganic phosphate additives detected in this product!');
+    } else {
+      alert('✅ No obvious inorganic phosphate additives found.');
     }
+    btnScanIngredients.textContent = 'Scan Ingredients (Phos-Catcher)';
+  };
 });
 
-async function displayLogs() {
-    const logList = document.getElementById('log-list');
-    if (!logList) return;
-    logList.innerHTML = '';
-    const logs = await getLogs();
-    logs.forEach(log => {
-        const li = document.createElement('li');
-        li.textContent = `${new Date(log.date).toLocaleTimeString()}: ${log.analysis}`;
-        logList.appendChild(li);
-    });
-}
+// Initial dashboard load
+renderDashboard();
