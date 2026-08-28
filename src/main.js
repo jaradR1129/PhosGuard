@@ -24,9 +24,7 @@ async function renderDashboard() {
     totalK += item.potassium_mg || 0;
 
     const li = document.createElement('li');
-    li.style.background = '#fff';
-    li.style.padding = '12px';
-    li.style.borderRadius = '8px';
+    li.className = 'food-log-item';
     li.innerHTML = `<strong>${item.foodName}</strong>: ${item.phos_mg}mg Phos | ${item.potassium_mg}mg K`;
     foodList.appendChild(li);
   });
