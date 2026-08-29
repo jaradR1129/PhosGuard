@@ -82,6 +82,15 @@
 
       <!-- Primary Action Buttons -->
       <section class="actions">
+        <!-- USDA Offline Database Search Box -->
+        <div class="manual-search-container" style="margin-bottom: 15px; display: flex; flex-direction: column; gap: 8px;">
+          <div style="display: flex; gap: 8px;">
+            <input type="text" id="search-input" placeholder="Search USDA food database..." style="flex: 1; padding: 10px; border-radius: 6px; border: 1px solid #ccc;" />
+            <button id="btn-search-db" class="primary-btn" style="padding: 10px 15px; margin: 0;">Search</button>
+          </div>
+          <ul id="search-results" class="food-list" style="max-height: 200px; overflow-y: auto; background: #fff; border-radius: 6px;"></ul>
+        </div>
+
         <button id="btn-scan-ingredients" class="primary-btn warning-theme">
           Scan Ingredients (Phos-Catcher)
         </button>
