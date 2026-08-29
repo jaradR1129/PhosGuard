@@ -1,3 +1,30 @@
+// A variable to hold the local USDA database in memory so it only downloads once
+let cachedFoods = null;
+
+// NEW: Function to search the local offline food database
+export async function searchFoodDatabase(query) {
+  if (!query || query.length < 2) return [];
+
+  // If the data isn't loaded yet, fetch it from the public folder
+  if (!cachedFoods) {
+    try {
+      const response = await fetch('/usda_renal_foods.json');
+      cachedFoods = await response.json();
+    } catch (error) {
+      console.error("Error loading food database:", error);
+      return [];
+    }
+  }
+
+  const lowerQuery = query.toLowerCase();
+  
+  // Search the database and return the top 20 results to keep the UI fast
+  return cachedFoods
+    .filter(food => food.name.toLowerCase().includes(lowerQuery))
+    .slice(0, 20);
+}
+
+// EXISTING: Barcode scanning function via Open Food Facts
 export async function fetchBarcodeData(barcode, patientPortionMultiplier = 1) {
   try {
     const response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
