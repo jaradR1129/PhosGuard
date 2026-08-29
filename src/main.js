@@ -1,7 +1,7 @@
 import { Html5Qrcode } from 'html5-qrcode';
 import { db } from './db.js';
 import { scanIngredients } from './utils/ocr.js';
-import { fetchBarcodeData } from './utils/api.js';
+import { fetchBarcodeData, searchFoodDatabase } from './utils/api.js';
 
 // Dashboard Elements
 const btnExport = document.getElementById('btn-export');
@@ -10,6 +10,11 @@ const foodList = document.getElementById('food-list');
 const btnScanIngredients = document.getElementById('btn-scan-ingredients');
 const btnScanBarcode = document.getElementById('btn-scan-barcode');
 const readerElement = document.getElementById('reader');
+
+// Manual Search Elements (Make sure to add these IDs to your index.html)
+const searchInput = document.getElementById('search-input');
+const btnSearchDb = document.getElementById('btn-search-db');
+const searchResults = document.getElementById('search-results');
 
 // Modal Elements
 const portionModal = document.getElementById('portion-modal');
@@ -166,6 +171,68 @@ fluidButtons.forEach(button => {
     renderDashboard();
   });
 });
+
+// -------------------------------------------------------------
+// Offline USDA Database Search Logic
+// -------------------------------------------------------------
+if (btnSearchDb && searchInput && searchResults) {
+  // Allow searching when clicking the button
+  btnSearchDb.addEventListener('click', handleDatabaseSearch);
+  
+  // Also allow searching by pressing the 'Enter' key
+  searchInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') handleDatabaseSearch();
+  });
+
+  async function handleDatabaseSearch() {
+    const query = searchInput.value.trim();
+    if (query.length < 2) {
+      searchResults.innerHTML = '<li class="search-msg">Please enter at least 2 characters...</li>';
+      return;
+    }
+
+    searchResults.innerHTML = '<li class="search-msg">Searching database...</li>';
+    
+    const results = await searchFoodDatabase(query);
+    
+    searchResults.innerHTML = '';
+    
+    if (results.length === 0) {
+      searchResults.innerHTML = '<li class="search-msg">No foods found.</li>';
+      return;
+    }
+
+    results.forEach(food => {
+      const li = document.createElement('li');
+      li.className = 'search-result-item';
+      // Show the base serving size so the user knows what they are multiplying
+      li.innerHTML = `<strong>${food.name}</strong> <br><small>Base Serving: ${food.servingSize}</small>`;
+      
+      li.addEventListener('click', () => {
+        // Map the USDA JSON keys to your app's standard keys
+        pendingFoodData = {
+          name: `${food.name} (${food.servingSize})`,
+          phos_mg: food.phosMg || 0,
+          potassium_mg: food.potassiumMg || 0,
+          sodium_mg: food.sodiumMg || 0,
+          protein_g: food.proteinG || 0
+        };
+
+        // Open the existing portion modal
+        modalFoodName.textContent = pendingFoodData.name;
+        portionSlider.value = 1; 
+        updateModalMath(); 
+        portionModal.style.display = 'flex'; 
+        
+        // Clear the search UI
+        searchResults.innerHTML = '';
+        searchInput.value = '';
+      });
+      
+      searchResults.appendChild(li);
+    });
+  }
+}
 
 // -------------------------------------------------------------
 // Interactive Modal Logic (Real-time math calculations)
