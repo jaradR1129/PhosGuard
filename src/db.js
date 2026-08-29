@@ -11,9 +11,9 @@ db.on('populate', () => {
   db.settings.add({
     id: 1,
     phosLimit: 1000,
-    potassiumLimit: 2500,
-    sodiumLimit: 2000,
-    proteinLimit: 90,
-    fluidLimit: 1000
+    potassiumLimit: 3000,
+    sodiumLimit: 2300,
+    proteinLimit: 84,
+    fluidLimit: 1500
   });
 });
