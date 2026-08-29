@@ -6,7 +6,7 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       devOptions: {
-        enabled: true 
+        enabled: true
       },
       manifest: {
         name: 'PhosGuard',
@@ -14,7 +14,7 @@ export default defineConfig({
         description: 'A renal diet and fluid tracker for hemodialysis patients.',
         theme_color: '#007bff',
         background_color: '#f4f7f6',
-        display: 'standalone', 
+        display: 'standalone',
         icons: [
           {
             src: '/icon-192.png',
@@ -29,7 +29,8 @@ export default defineConfig({
         ]
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,json}'], 
+        maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,json}'],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/world\.openfoodfacts\.org\/api\/.*/i,
@@ -37,8 +38,8 @@ export default defineConfig({
             options: {
               cacheName: 'food-facts-api-cache',
               expiration: {
-                maxEntries: 100, 
-                maxAgeSeconds: 60 * 60 * 24 * 30 
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 60 * 24 * 30
               },
               cacheableResponse: {
                 statuses: [0, 200]
